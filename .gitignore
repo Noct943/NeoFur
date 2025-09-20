@@ -1,0 +1,13 @@
+# build artifacts
+build/
+install/
+log/
+compile_commands.json
+
+# Docker related files
+docker/
+
+device-tree/
+
+.clangd
+.clang-format
