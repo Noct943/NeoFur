@@ -9,6 +9,7 @@
 #include <functional>
 #include <utility>
 
+namespace neofur {
 namespace utils {
 // 辅助类：ScopeGuard，用于在作用域退出时执行清理函数
 // 这是一个通用的 RAII 模式，可以避免重复的错误清理代码
@@ -116,5 +117,5 @@ class MappedFile {
 };
 
 }  // namespace utils
-
+}  // namespace neofur
 #endif  // UTILS_H

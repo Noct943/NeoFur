@@ -1,0 +1,23 @@
+# If 语句确保这些规则只在容器内的路径上生效
+If:
+  PathMatch: .*/workspace/.*
+
+Index:
+  # 【关键性能优化 1】排除不需要索引的目录
+  # clangd 默认会索引项目中的所有文件，包括构建产物、日志、三方库等。
+  # 明确排除它们可以极大地减少索引的工作量和时间。
+  PathExclude:
+    - /workspace/build/**
+    - /workspace/install/**
+    # 如果你有下载到本地的三方库源码，也请加到这里
+    # - /workspace/third_party/**
+    # 如果有文档、日志等目录，也一并排除
+    # - /workspace/docs/**
+    - /workspace/log/**
+    - /workspace/docker/**
+    #
+
+Preamble:
+  # 将 Preamble 缓存从内存 (memory) 改为磁盘 (disk)
+  # 这样在重启 clangd 后也无需重新解析头文件，加快文件首次打开后的响应速度
+  Storage: disk

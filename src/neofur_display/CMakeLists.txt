@@ -1,67 +1,97 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.16)
 project(neofur_display)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# --- 依赖包查找 ---
+# --- 1. 查找 ROS 和底层系统依赖 ---
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(neofur_utils REQUIRED)
-find_package(PkgConfig REQUIRED)
 find_package(neofur_interfaces REQUIRED)
 
+# 使用 PkgConfig 查找 DRM/GBM/EGL/GLESv2 (保持不变)
+find_package(PkgConfig REQUIRED)
 pkg_check_modules(DRM REQUIRED libdrm)
+pkg_check_modules(GBM REQUIRED gbm)
+pkg_check_modules(EGL REQUIRED egl)
+pkg_check_modules(GLESv2 REQUIRED glesv2)
 
-# --- [改进] 使用 find_library 手动查找 RGA 库 ---
-# 由于 librga 是我们手动 COPY 到 /usr/local 下的，它没有 .pc 文件
-# 因此我们使用 find_library 直接在指定路径下查找
-find_library(RGA_LIBRARY
-             NAMES rga
-             PATHS /usr/local/lib
-             REQUIRED)
-message(STATUS "Found RGA library: ${RGA_LIBRARY}")
+# --- 2. 查找由 vcpkg 管理的 C++ 库 ---
+# find_package 会通过 CMAKE_TOOLCHAIN_FILE 自动找到这些库
+find_package(ms-gsl REQUIRED)
+find_package(Corrade REQUIRED Utility)
+find_package(Magnum REQUIRED GL MeshTools Primitives SceneGraph Shaders Trade)
+find_package(MagnumPlugins REQUIRED AnyImageImporter GltfImporter)
+find_package(MagnumIntegration REQUIRED)
+find_package(TinyGLTF REQUIRED)
 
-# --- 可执行文件定义 ---
-add_executable(neofur_display_node
-  src/app.cc
-  src/atomic.cc
-  src/device.cc
-  src/display.cc
-  src/layer.cc
-  src/node.cc
-  src/main.cc
-)
+# --- 3. 可执行文件定义 ---
 
-# --- 依赖项 ---
-ament_target_dependencies(
-  neofur_display_node
-  rclcpp
-  neofur_utils
-  neofur_interfaces
-)
+# a) logic_node (保持不变, 职责清晰)
+add_executable(logic_node src/logic/logic_node.cc)
 
-# --- 头文件路径 ---
-target_include_directories(neofur_display_node PUBLIC
+target_include_directories(logic_node PRIVATE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
-  ${neofur_utils_INCLUDE_DIRS}
-  ${DRM_INCLUDE_DIRS}
-  # --- [改进] 直接添加 RGA 头文件路径 ---
-  # 我们明确知道头文件被安装到了 /usr/local/include
-  /usr/local/include
-  /usr/include)
-
-# --- 链接库 ---
-target_link_libraries(neofur_display_node
-  ${DRM_LIBRARIES}
-  # --- [改进] 链接找到的 RGA 库 ---
-  ${RGA_LIBRARY}
 )
 
-# --- 安装规则 ---
+target_link_libraries(logic_node
+  rclcpp::rclcpp
+  neofur_interfaces::neofur_interfaces__rosidl_generator_cpp
+  neofur_utils::neofur_utils
+)
+
+
+# b) renderer_node (更新以链接所有新库)
+#    确保 GLOB 包含所有子目录的源文件
+file(GLOB RENDERER_SOURCES
+  "src/renderer/*.cc"
+  "src/renderer/platform/*.cc"
+  "src/renderer/core/*.cc"      # 假设您的新渲染核心代码在此
+)
+add_executable(renderer_node ${RENDERER_SOURCES})
+
+target_include_directories(renderer_node PRIVATE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  # 系统库的头文件路径
+  ${DRM_INCLUDE_DIRS}
+  ${GBM_INCLUDE_DIRS}
+  ${EGL_INCLUDE_DIRS}
+  ${GLESv2_INCLUDE_DIRS}
+)
+
+target_link_libraries(renderer_node
+  # ROS 库
+  rclcpp::rclcpp
+  neofur_interfaces::neofur_interfaces__rosidl_generator_cpp
+  neofur_utils::neofur_utils
+
+  # 底层平台库
+  ${DRM_LIBRARIES}
+  ${GBM_LIBRARIES}
+  ${EGL_LIBRARIES}
+  ${GLESv2_LIBRARIES}
+
+  # vcpkg 提供的现代 C++ 库
+  GSL::gsl
+  Corrade::Utility
+  Magnum::GL
+  Magnum::MeshTools
+  Magnum::Primitives
+  Magnum::SceneGraph
+  Magnum::Shaders
+  Magnum::Trade
+  Magnum::Integration
+  MagnumPlugins::AnyImageImporter
+  MagnumPlugins::GltfImporter
+  tinygltf # tinygltf 的 CMake 目标
+)
+
+# --- 4. 安装规则 (保持不变) ---
 install(
-  TARGETS neofur_display_node
+  TARGETS
+    logic_node
+    renderer_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
@@ -75,5 +105,6 @@ install(
   DESTINATION share/${PROJECT_NAME}
 )
 
-# --- ament 包 ---
+
+# --- 5. Ament 打包 ---
 ament_package()

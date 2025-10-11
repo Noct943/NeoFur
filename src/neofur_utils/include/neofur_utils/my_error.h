@@ -16,9 +16,10 @@
 #include <cstring>
 #include <string>
 
-#include "expected.hpp"
+#include "external/expected.hpp"
 #include "source_location.h"
 
+namespace neofur {
 namespace utils {
 
 /**
@@ -39,6 +40,9 @@ enum class ErrorCode {
   RuntimeError,
 
   ResourceExhausted,
+
+  // @brief 渲染错误
+  RenderError,
 
   /** @brief 表示未知的、未分类的错误。*/
   Unknown,
@@ -84,6 +88,9 @@ struct Error {
         case ErrorCode::RuntimeError:
           msg = "A runtime operation failed or timed out";
           break;
+        case ErrorCode::RenderError:
+          msg = "渲染错误";
+          break;
         case ErrorCode::Unknown:
         default:
           msg = "An unknown error occurred";
@@ -114,7 +121,7 @@ struct Error {
 template <typename T>
 using ResultErr = tl::expected<T, utils::Error>;
 }  // namespace utils
-
+}  // namespace neofur
 /**
  * @def MAKE_ERROR(code)
  * @brief 创建一个标准错误对象的便捷宏。

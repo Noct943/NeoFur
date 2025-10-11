@@ -2,18 +2,30 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>neofur_display</name>
-  <version>0.0.1</version>
-  <description>Display node for neofur project using DRM</description>
-  <maintainer email="your_email@example.com">Your Name</maintainer>
+  <version>1.0.0</version>
+  <description>
+    The NeoFur display package. It contains a logic node for high-level control
+    and a dedicated GPU renderer node for high-performance graphics.
+  </description>
+  <maintainer email="1262017215@qq.com">Qingz</maintainer>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>rclcpp</depend>
-  <depend>neofur_utils</depend>
   <depend>neofur_interfaces</depend>
+  <depend>neofur_utils</depend>
+  <depend>launch_ros</depend>
 
   <build_depend>libdrm-dev</build_depend>
+  <build_depend>libgbm-dev</build_depend>
+  <build_depend>libegl1-mesa-dev</build_depend>
+  <build_depend>libgles2-mesa-dev</build_depend>
+  
+  <exec_depend>libdrm2</exec_depend>
+  <exec_depend>libgbm1</exec_depend>
+  <exec_depend>libegl1</exec_depend>
+  <exec_depend>libgles2</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

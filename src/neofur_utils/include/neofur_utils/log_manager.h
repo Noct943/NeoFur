@@ -5,6 +5,7 @@
 #include <string>
 #include <string_view>
 
+namespace neofur {
 namespace utils {
 
 // 1. 定义日志级别
@@ -59,4 +60,5 @@ class LogManager {
 };
 
 }  // namespace utils
+}  // namespace neofur
 #endif  // LOG_MANAGER_H

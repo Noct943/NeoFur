@@ -13,6 +13,7 @@
 
 #include <cstdint>
 
+namespace neofur {
 namespace utils {
 
 /**
@@ -28,6 +29,7 @@ struct source_location {
 };
 
 }  // namespace utils
+} //namespace neofur
 
 /**
  * @def CURRENT_LOCATION()

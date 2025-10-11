@@ -5,8 +5,8 @@
 
 #include "external/BS_thread_pool.hpp"
 
+namespace neofur{
 namespace utils {
-
 /**
  * @class ThreadPoolManager
  * @brief 提供一个全局单例的 BS::thread_pool 实例。
@@ -25,5 +25,5 @@ class ThreadPoolManager {
   ThreadPoolManager& operator=(const ThreadPoolManager&)=delete;
 };
 }  // namespace utils
-
+} //namespace neofur
 #endif  // THREAD_POOL_H

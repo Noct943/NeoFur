@@ -11,6 +11,6 @@ services:
     stdin_open: true
     tty: true
     volumes:
-      - .:/workspace
+      - ../:/workspace
     # 使用一个永远不会退出的命令来保持容器运行
     command: tail -f /dev/null
