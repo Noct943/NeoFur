@@ -1,0 +1,16 @@
+services:
+  neofur:
+    build:
+      context: ./docker
+      network: host  # <-- 在这里指定构建时使用的网络
+    image: rk3568-ros2:dev
+    platform: linux/arm64
+    # ... 其他运行时配置保持不变 ...
+    network_mode: "host"
+    container_name: rk3568_arm64_dev
+    stdin_open: true
+    tty: true
+    volumes:
+      - .:/workspace
+    # 使用一个永远不会退出的命令来保持容器运行
+    command: tail -f /dev/null

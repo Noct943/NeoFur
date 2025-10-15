@@ -1,0 +1,8 @@
+# build artifacts
+build/
+install/
+log/
+compile_commands.json
+
+.clangd
+.clang-format
